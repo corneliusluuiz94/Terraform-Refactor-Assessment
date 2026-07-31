@@ -1,5 +1,9 @@
-# No variables exist yet at this stage of the refactor.
-# This file is created now so the project structure is in place
-# ahead of Feature 2 (provider credentials), Feature 3 (workspaces),
-# Feature 4 (loops), Feature 5 (conditionals), and Feature 6 (validation)
-# — each of which will add variables here.
+variable "aws_region" {
+  type        = string
+  description = "AWS region to deploy resources into"
+}
+
+variable "aws_profile" {
+  type        = string
+  description = "Named AWS CLI profile to authenticate with (not the default profile)"
+}
