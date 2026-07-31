@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 # --- Networking ---
 
 resource "aws_vpc" "main" {
