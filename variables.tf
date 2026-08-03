@@ -27,3 +27,12 @@ variable "instance_count" {
   description = "Number of web EC2 instances to deploy"
   default     = 1
 }
+variable "instance_type_map" {
+  type        = map(string)
+  description = "EC2 instance type per environment"
+  default = {
+    dev     = "t2.micro"
+    staging = "t3.small"
+    prod    = "t3.medium"
+  }
+}
