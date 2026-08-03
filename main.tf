@@ -68,7 +68,7 @@ resource "aws_security_group" "web_sg" {
 resource "aws_instance" "web" {
   count = var.instance_count
   ami                    = "ami-0c101f26f147fa7fd" # Amazon Linux 2023, us-east-1 - verify/update before applying
-  instance_type          = "t2.micro"
+  instance_type          = var.instance_type_map[local.environment]
   subnet_id              = values(aws_subnet.public)[count.index % length(aws_subnet.public)].id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
@@ -85,9 +85,24 @@ resource "aws_s3_bucket" "app_bucket" {
     Name = "app-bucket-${local.environment}"
   })
 }
+# Versioning is a separate resource in the AWS provider (not an attribute
+# on aws_s3_bucket). Enabled in staging/prod; left off in dev to avoid
+# piling up noise from throwaway test objects.
+resource "aws_s3_bucket_versioning" "app_bucket" {
+  bucket = aws_s3_bucket.app_bucket.id
+
+  versioning_configuration {
+    status = contains(["staging", "prod"], local.environment) ? "Enabled" : "Suspended"
+  }
+}
+
 
 # --- Monitoring ---
 resource "aws_cloudwatch_metric_alarm" "cpu_alarm" {
+  # count = 0 in dev/staging means this resource simply doesn't exist there -
+  # not "exists but disabled."
+  count = local.environment == "prod" ? 1 : 0
+
   alarm_name          = "high-cpu-usage-${local.environment}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
